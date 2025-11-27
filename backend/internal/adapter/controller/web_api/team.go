@@ -62,7 +62,11 @@ func (tc *TeamController) Get(w http.ResponseWriter, r *http.Request) error {
 		if err != nil {
 			return err
 		}
-		writeJSON(w, http.StatusOK, teams)
+		responses := make([]*teamdto.CreateTeamResponse, len(teams))
+		for i, team := range teams {
+			responses[i] = teamdto.ToCreateTeamResponse(&team)
+		}
+		writeJSON(w, http.StatusOK, responses)
 		return nil
 	}
 
@@ -71,7 +75,11 @@ func (tc *TeamController) Get(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	writeJSON(w, http.StatusOK, teams)
+	responses := make([]*teamdto.CreateTeamResponse, len(teams))
+	for i, team := range teams {
+		responses[i] = teamdto.ToCreateTeamResponse(&team)
+	}
+	writeJSON(w, http.StatusOK, responses)
 	return nil
 }
 
