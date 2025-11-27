@@ -4,7 +4,7 @@ import "github.com/andreychh/coopera-backend/internal/entity"
 
 type UpdateTaskRequest struct {
 	TaskID        int32   `json:"task_id" validate:"required,gt=0"`
-	Status        *string `json:"status" validate:"omitempty,oneof=open assigned completed archived"`
+	Status        *string `json:"status" validate:"omitempty,oneof=open assigned in_review completed archived"`
 	AssignedTo    *int32  `json:"assigned_to" validate:"omitempty,gt=0"`
 	CurrentUserID int32   `json:"current_user_id" validate:"required,gt=0"`
 }

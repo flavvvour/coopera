@@ -1,0 +1,3 @@
+-- Revert in_review status changes
+-- Note: PostgreSQL doesn't support removing enum values directly
+-- This migration is a placeholder and requires manual intervention if rollback is needed
