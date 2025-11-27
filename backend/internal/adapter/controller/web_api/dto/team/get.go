@@ -3,7 +3,8 @@ package team
 import "github.com/andreychh/coopera-backend/internal/entity"
 
 type GetTeamRequest struct {
-	TeamID int32 `form:"team_id" validate:"required"`
+	TeamID int32 `form:"team_id" validate:"omitempty,gt=0"`
+	UserID int32 `form:"user_id" validate:"omitempty,gt=0"`
 }
 
 type GetTeamResponse struct {

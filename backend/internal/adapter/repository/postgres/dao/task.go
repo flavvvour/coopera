@@ -166,3 +166,32 @@ func (r *TaskDAO) GetByTeamID(ctx context.Context, teamID int32) ([]entity.Task,
 
 	return tasks, nil
 }
+
+func (r *TaskDAO) Update(ctx context.Context, task task_model.Task) (entity.Task, error) {
+	const query = `
+		UPDATE coopera.tasks
+		SET status = $1, assigned_to = $2, updated_at = NOW()
+		WHERE id = $3
+		RETURNING id, team_id, title, description, points, status, assigned_to,
+		          created_by, created_at, updated_at
+	`
+
+	tx, ok := ctx.Value(postgres.TransactionKey{}).(postgres.Transaction)
+	if !ok {
+		return entity.Task{}, repoErr.ErrTransactionNotFound
+	}
+
+	var m task_model.Task
+	err := tx.QueryRow(ctx, query, task.Status, task.AssignedTo, task.ID).Scan(
+		&m.ID, &m.TeamID, &m.Title, &m.Description, &m.Points,
+		&m.Status, &m.AssignedTo, &m.CreatedBy, &m.CreatedAt, &m.UpdatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return entity.Task{}, repoErr.ErrNotFound
+		}
+		return entity.Task{}, fmt.Errorf("%w: %v", repoErr.ErrFailUpdate, err)
+	}
+
+	return converter.FromModelToEntityTask(m), nil
+}

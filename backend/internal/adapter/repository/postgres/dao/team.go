@@ -123,3 +123,73 @@ func (r *TeamDAO) ExistsByID(ctx context.Context, teamID int32) (bool, error) {
 
 	return exists, nil
 }
+
+func (r *TeamDAO) GetAll(ctx context.Context) ([]entity.TeamEntity, error) {
+	const query = `
+		SELECT id, name, created_by, created_at
+		FROM coopera.teams
+		ORDER BY created_at DESC
+	`
+
+	tx, ok := ctx.Value(postgres.TransactionKey{}).(postgres.Transaction)
+	if !ok {
+		return nil, repoErr.ErrTransactionNotFound
+	}
+
+	rows, err := tx.Query(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", repoErr.ErrDB, err)
+	}
+	defer rows.Close()
+
+	var teams []entity.TeamEntity
+	for rows.Next() {
+		var t team_model.Team
+		if err := rows.Scan(&t.ID, &t.Name, &t.CreatedBy, &t.CreatedAt); err != nil {
+			return nil, fmt.Errorf("%w: %v", repoErr.ErrDB, err)
+		}
+		teams = append(teams, converter.FromModelToEntityTeam(t))
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("%w: %v", repoErr.ErrDB, err)
+	}
+
+	return teams, nil
+}
+
+func (r *TeamDAO) GetByUserID(ctx context.Context, userID int32) ([]entity.TeamEntity, error) {
+	const query = `
+		SELECT t.id, t.name, t.created_by, t.created_at
+		FROM coopera.teams t
+		INNER JOIN coopera.memberships m ON t.id = m.team_id
+		WHERE m.member_id = $1
+		ORDER BY t.created_at DESC
+	`
+
+	tx, ok := ctx.Value(postgres.TransactionKey{}).(postgres.Transaction)
+	if !ok {
+		return nil, repoErr.ErrTransactionNotFound
+	}
+
+	rows, err := tx.Query(ctx, query, userID)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", repoErr.ErrDB, err)
+	}
+	defer rows.Close()
+
+	var teams []entity.TeamEntity
+	for rows.Next() {
+		var t team_model.Team
+		if err := rows.Scan(&t.ID, &t.Name, &t.CreatedBy, &t.CreatedAt); err != nil {
+			return nil, fmt.Errorf("%w: %v", repoErr.ErrDB, err)
+		}
+		teams = append(teams, converter.FromModelToEntityTeam(t))
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("%w: %v", repoErr.ErrDB, err)
+	}
+
+	return teams, nil
+}

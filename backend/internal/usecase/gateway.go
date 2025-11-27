@@ -23,6 +23,8 @@ type TeamRepository interface {
 	CreateRepo(ctx context.Context, team entity.TeamEntity) (entity.TeamEntity, error)
 	DeleteRepo(ctx context.Context, teamID int32) error
 	GetByIDRepo(ctx context.Context, teamID int32) (entity.TeamEntity, error)
+	GetAllRepo(ctx context.Context) ([]entity.TeamEntity, error)
+	GetByUserIDRepo(ctx context.Context, userID int32) ([]entity.TeamEntity, error)
 	ExistsByName(ctx context.Context, name string) (bool, error)
 	ExistsByID(ctx context.Context, teamID int32) (bool, error)
 }
@@ -39,4 +41,5 @@ type TaskRepository interface {
 	GetByTaskID(ctx context.Context, id int32) (entity.Task, error)
 	GetByAssignedToID(ctx context.Context, userID int32) ([]entity.Task, error)
 	GetByTeamID(ctx context.Context, teamID int32) ([]entity.Task, error)
+	UpdateRepo(ctx context.Context, task entity.Task) (entity.Task, error)
 }

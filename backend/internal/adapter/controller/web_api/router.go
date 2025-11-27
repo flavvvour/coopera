@@ -45,7 +45,7 @@ func (r *Router) SetupRoutes() http.Handler {
 
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{r.config.FrontendURL},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 		AllowedHeaders:   []string{"Accept", "Content-Type"},
 		AllowCredentials: false,
 		MaxAge:           300,
@@ -73,6 +73,7 @@ func (r *Router) SetupRoutes() http.Handler {
 		api.Route("/tasks", func(tasks chi.Router) {
 			tasks.Post("/", middleware.ErrorHandler(r.taskController.Create))
 			tasks.Get("/", middleware.ErrorHandler(r.taskController.Get))
+			tasks.Patch("/", middleware.ErrorHandler(r.taskController.Update))
 			//tasks.Delete("/", middleware.ErrorHandler(r.taskController.Delete))
 		})
 	})

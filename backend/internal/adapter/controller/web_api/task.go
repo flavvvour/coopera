@@ -59,6 +59,24 @@ func (tc *TaskController) Get(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+func (tc *TaskController) Update(w http.ResponseWriter, r *http.Request) error {
+	var req taskdto.UpdateTaskRequest
+	if err := BindRequest(r, &req); err != nil {
+		if ve, ok := err.(validator.ValidationErrors); ok {
+			return errors.WrapValidationError(ve)
+		}
+		return errors.ErrInvalidInput
+	}
+
+	task, err := tc.taskUseCase.UpdateUsecase(r.Context(), *taskdto.ToEntityUpdateTaskRequest(&req), req.CurrentUserID)
+	if err != nil {
+		return err
+	}
+
+	writeJSON(w, http.StatusOK, taskdto.ToUpdateTaskResponse(&task))
+	return nil
+}
+
 //
 //func (tc *TaskController) Delete(w http.ResponseWriter, r *http.Request) error {
 //	var req teamdto.DeleteTeamRequest

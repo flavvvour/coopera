@@ -123,3 +123,39 @@ func (uc *TeamUsecase) ExistTeamByIDUsecase(ctx context.Context, teamID int32) (
 	}
 	return exists, nil
 }
+
+func (uc *TeamUsecase) GetAllTeamsUsecase(ctx context.Context) ([]entity.TeamEntity, error) {
+	var teams []entity.TeamEntity
+
+	err := uc.txManager.WithinTransaction(ctx, func(txCtx context.Context) error {
+		var err error
+		teams, err = uc.teamRepository.GetAllRepo(txCtx)
+		if err != nil {
+			return fmt.Errorf("failed to get all teams: %w", err)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return teams, nil
+}
+
+func (uc *TeamUsecase) GetTeamsByUserIDUsecase(ctx context.Context, userID int32) ([]entity.TeamEntity, error) {
+	var teams []entity.TeamEntity
+
+	err := uc.txManager.WithinTransaction(ctx, func(txCtx context.Context) error {
+		var err error
+		teams, err = uc.teamRepository.GetByUserIDRepo(txCtx, userID)
+		if err != nil {
+			return fmt.Errorf("failed to get teams by user ID: %w", err)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return teams, nil
+}

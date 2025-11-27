@@ -38,3 +38,8 @@ func (ur *TaskRepository) GetByAssignedToID(ctx context.Context, userID int32) (
 func (ur *TaskRepository) GetByTeamID(ctx context.Context, teamID int32) ([]entity.Task, error) {
 	return ur.TaskDAO.GetByTeamID(ctx, teamID)
 }
+
+func (ur *TaskRepository) UpdateRepo(ctx context.Context, task entity.Task) (entity.Task, error) {
+	taskModel := converter.FromEntityToModelTask(task)
+	return ur.TaskDAO.Update(ctx, taskModel)
+}

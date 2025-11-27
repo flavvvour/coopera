@@ -15,6 +15,8 @@ type TeamUseCase interface {
 	CreateUsecase(ctx context.Context, team entity.TeamEntity) (entity.TeamEntity, error)
 	DeleteUsecase(ctx context.Context, teamID, currentUserID int32) error
 	GetByIDUsecase(ctx context.Context, teamID int32) (entity.TeamEntity, []entity.MembershipEntity, error)
+	GetAllTeamsUsecase(ctx context.Context) ([]entity.TeamEntity, error)
+	GetTeamsByUserIDUsecase(ctx context.Context, userID int32) ([]entity.TeamEntity, error)
 	ExistTeamByIDUsecase(ctx context.Context, teamID int32) (bool, error)
 }
 
@@ -28,4 +30,5 @@ type MembershipUseCase interface {
 type TaskUseCase interface {
 	CreateUsecase(ctx context.Context, task entity.Task) (entity.Task, error)
 	GetUsecase(ctx context.Context, taskFilter entity.TaskFilter) ([]entity.Task, error)
+	UpdateUsecase(ctx context.Context, task entity.Task, currentUserID int32) (entity.Task, error)
 }

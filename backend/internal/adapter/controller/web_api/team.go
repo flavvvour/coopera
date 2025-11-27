@@ -46,12 +46,32 @@ func (tc *TeamController) Get(w http.ResponseWriter, r *http.Request) error {
 		return errors.ErrInvalidInput
 	}
 
-	team, membership, err := tc.teamUseCase.GetByIDUsecase(r.Context(), req.TeamID)
+	// Если передан TeamID - возвращаем конкретную команду
+	if req.TeamID != 0 {
+		team, membership, err := tc.teamUseCase.GetByIDUsecase(r.Context(), req.TeamID)
+		if err != nil {
+			return err
+		}
+		writeJSON(w, http.StatusOK, teamdto.ToGetTeamResponse(team, membership))
+		return nil
+	}
+
+	// Если передан UserID - возвращаем команды пользователя
+	if req.UserID != 0 {
+		teams, err := tc.teamUseCase.GetTeamsByUserIDUsecase(r.Context(), req.UserID)
+		if err != nil {
+			return err
+		}
+		writeJSON(w, http.StatusOK, teams)
+		return nil
+	}
+
+	// Иначе возвращаем все команды
+	teams, err := tc.teamUseCase.GetAllTeamsUsecase(r.Context())
 	if err != nil {
 		return err
 	}
-
-	writeJSON(w, http.StatusOK, teamdto.ToGetTeamResponse(team, membership))
+	writeJSON(w, http.StatusOK, teams)
 	return nil
 }
 

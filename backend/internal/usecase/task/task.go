@@ -99,3 +99,55 @@ func (uc *TaskUsecase) GetUsecase(ctx context.Context, f entity.TaskFilter) ([]e
 
 	return result, nil
 }
+
+func (uc *TaskUsecase) UpdateUsecase(ctx context.Context, task entity.Task, currentUserID int32) (entity.Task, error) {
+	var updatedTask entity.Task
+
+	err := uc.txManager.WithinTransaction(ctx, func(txCtx context.Context) error {
+		// Получаем существующую задачу
+		existingTask, err := uc.taskRepository.GetByTaskID(txCtx, task.ID)
+		if err != nil {
+			return fmt.Errorf("failed to get task: %w", err)
+		}
+
+		// Проверяем, что пользователь является членом команды
+		members, err := uc.membershipsUsecase.GetMembersUsecase(txCtx, existingTask.TeamID)
+		if err != nil {
+			return err
+		}
+
+		isMember := false
+		for _, m := range members {
+			if m.MemberID == currentUserID {
+				isMember = true
+				break
+			}
+		}
+
+		if !isMember {
+			return appErr.ErrNoPermissionToUpdate
+		}
+
+		// Обновляем только переданные поля
+		if task.Status != nil {
+			existingTask.Status = task.Status
+		}
+
+		if task.AssignedTo != nil {
+			existingTask.AssignedTo = task.AssignedTo
+		}
+
+		updatedTask, err = uc.taskRepository.UpdateRepo(txCtx, existingTask)
+		if err != nil {
+			return fmt.Errorf("failed to update task: %w", err)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return entity.Task{}, err
+	}
+
+	return updatedTask, nil
+}
